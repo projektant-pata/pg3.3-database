@@ -1,13 +1,16 @@
 package cz.spse.bajer.gui;
 
-import cz.spse.bajer.facade.CategoryFacade;
-import cz.spse.bajer.facade.FoodFacade;
-import cz.spse.bajer.facade.SpecialOfferFacade;
+import cz.spse.bajer.app.App;
+import cz.spse.bajer.app.CategoryManager;
+import cz.spse.bajer.app.interfaces.ICategoryManager;
+import cz.spse.bajer.app.interfaces.IFoodManager;
+import cz.spse.bajer.app.interfaces.ISpecialOfferManager;
 import cz.spse.bajer.object.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindow extends JDialog {
@@ -18,22 +21,21 @@ public class MainWindow extends JDialog {
     private JPanel addBtnsPanel;
     private JPanel contentPanel;
 
-    private CategoryFacade categoryFacade;
-    private FoodFacade foodFacade;
-    private SpecialOfferFacade specialOfferFacade;
-    private String[] categories;
+    private ICategoryManager categoryManager;
+    private IFoodManager foodManager;
+    private ISpecialOfferManager specialOfferManager;
 
     private int lastId = -1;
 
-    public MainWindow() {
+    public MainWindow(App app) {
         setContentPane(contentPane);
         setModal(true);
         setTitle("Main Window");
         setLocationRelativeTo(null);
 
-        categoryFacade = new CategoryFacade();
-        foodFacade = new FoodFacade();
-        specialOfferFacade = new SpecialOfferFacade();
+        this.categoryManager = app.getCategoryManager();
+        this.foodManager = app.getFoodManager();
+        this.specialOfferManager = app.getSpecialOfferManager();
 
         contentPane.registerKeyboardAction(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -66,14 +68,9 @@ public class MainWindow extends JDialog {
 
     private void fillWindow() {
         contentPanel.removeAll();
+        List<Category> categories = categoryManager.readAll();
 
-        categories = categoryFacade.readAllCategoryNames();
-
-        List<Category> categories = categoryFacade.readAll();
-        for(Category category : categories) {
-            List<Food> foods = foodFacade.readAllFoodsByCategory(category.getId());
-            List<SpecialOffer> specialOffers = specialOfferFacade.readAllSpecialOffersByCategory(category.getId());
-
+        for(Category category : categories){
             JButton categoryButton = new JButton(category.getName());
             categoryButton.setBackground(Color.yellow);
             categoryButton.setPreferredSize(new Dimension(400, 50));
@@ -87,6 +84,8 @@ public class MainWindow extends JDialog {
 
             JPanel itemsPanel = new JPanel();
             itemsPanel.setLayout(new GridLayout(0, 4));
+            List<Food> foods = foodManager.readAllByCategory(category.getId());
+            List<SpecialOffer> specialOffers = specialOfferManager.readAllByCategory(category.getId());
 
             for(Food food : foods) {
                 JButton foodButton = new JButton(food.getName() + " - " + food.getPrice() + " Kč");
@@ -110,10 +109,10 @@ public class MainWindow extends JDialog {
                 });
                 itemsPanel.add(specialOfferButton);
             }
-            contentPanel.add(itemsPanel);
-            contentPanel.revalidate();
-            contentPanel.repaint();
         }
+
+        contentPanel.revalidate();
+        contentPanel.repaint();
     }
 
 
@@ -129,13 +128,13 @@ public class MainWindow extends JDialog {
                 break;
             case 1:
                 if (lastId == -1)
-                    categoryFacade.create(new Category(0, categoryWindow.getCategoryName()));
+                    categoryManager.create(new Category(0, categoryWindow.getCategoryName()));
                 else
-                    categoryFacade.update(lastId , new Category(lastId, categoryWindow.getCategoryName()));
+                    categoryManager.update(lastId , new Category(lastId, categoryWindow.getCategoryName()));
                 fillWindow();
                 break;
             case 2:
-                categoryFacade.delete(lastId);
+                categoryManager.delete(lastId);
                 fillWindow();
                 break;
         }
@@ -145,7 +144,7 @@ public class MainWindow extends JDialog {
     private void setAddFoodButton(Food food){
         if (food != null)
             lastId = food.getId();
-        FoodWindow foodWindow = new FoodWindow(food, categories);
+        FoodWindow foodWindow = new FoodWindow(food, categoryManager.readAll());
         foodWindow.pack();
         foodWindow.setVisible(true);
 
@@ -190,6 +189,10 @@ public class MainWindow extends JDialog {
                 break;
         }
         lastId = -1;
+    }
+
+    private void editDialogBuilder(TemplateObj obj){
+
     }
 
 }

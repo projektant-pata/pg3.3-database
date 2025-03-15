@@ -1,22 +1,7 @@
 package cz.spse.bajer.object;
 
-public class Category {
-    private int id;
-    private String name;
-
+public class Category extends TemplateObj {
     public Category(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        super(id, name);
     }
 }
