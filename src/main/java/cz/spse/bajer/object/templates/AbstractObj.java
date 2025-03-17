@@ -1,10 +1,10 @@
-package cz.spse.bajer.object;
+package cz.spse.bajer.object.templates;
 
-public abstract class TemplateObj {
+public abstract class AbstractObj {
     private int id;
     private String name;
 
-    public TemplateObj(int id, String name) {
+    public AbstractObj(int id, String name) {
         this.id = id;
         this.name = name;
     }

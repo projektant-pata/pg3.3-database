@@ -5,6 +5,5 @@ import cz.spse.bajer.object.Food;
 import java.util.ArrayList;
 
 
-public interface IFoodManager extends IObjectManager<Food> {
-    ArrayList<Food> readAllByCategory(int categoryId);
+public interface IFoodManager extends IPricedObjectManager<Food> {
 }

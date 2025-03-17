@@ -28,8 +28,6 @@ public class App {
         this.categoryManager = new CategoryManager(categoryDS);
         this.foodManager = new FoodManager(foodDS);
         this.specialOfferManager = new SpecialOfferManager(specialOfferDS);
-
-
     }
 
     public ICategoryManager getCategoryManager() {

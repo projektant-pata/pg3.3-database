@@ -4,98 +4,64 @@ import cz.spse.bajer.data.interfaces.ISpecialOfferDS;
 import cz.spse.bajer.object.Category;
 import cz.spse.bajer.object.SpecialOffer;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.HashMap;
+import java.sql.*;
 
-public class SpecialOfferDB implements ISpecialOfferDS {
-    private final Connection conn;
-
+public class SpecialOfferDB extends AbstractPricedDB<SpecialOffer> implements ISpecialOfferDS {
     public SpecialOfferDB(Connection conn) {
-        this.conn = conn;
+        super(conn);
     }
 
     @Override
-    public SpecialOffer create(SpecialOffer specialOffer) {
-        String sql = "INSERT INTO special_offer (name, price, id_food) VALUES (?,?,?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, specialOffer.getName());
-            stmt.setFloat(2, specialOffer.getPrice());
-            stmt.setInt(3, specialOffer.getCategory().getId());
-            stmt.executeUpdate();
-            conn.commit();
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int id = generatedKeys.getInt(1);
-                    return new SpecialOffer(id, specialOffer.getName(), specialOffer.getPrice(), specialOffer.getCategory());
-                } else {
-                    throw new RuntimeException("Vložení speciální nabídky selhalo, nebylo vygenerováno ID.");
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    protected String getInsertQuery() {
+        return "INSERT INTO special_offer (name, price, id_category) VALUES (?, ?, ?)";
     }
 
     @Override
-    public SpecialOffer read(int id) {
-        String sql = "SELECT * FROM special_offer JOIN category ON special_offer.id_category = category.id WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new SpecialOffer(id, rs.getString("name"), rs.getFloat("price"), new Category(rs.getInt("category.id"), rs.getString("category.name")));
-            }
-            return null;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    protected void setInsertParameters(PreparedStatement stmt, SpecialOffer obj) throws SQLException {
+        stmt.setString(1, obj.getName());
+        stmt.setFloat(2, obj.getPrice());
+        stmt.setInt(3, obj.getCategory().getId());
     }
 
     @Override
-    public boolean update(int id, SpecialOffer SpecialOffer) {
-        String sql = "UPDATE special_offer SET name = ?, price = ?, id_food = ? WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, SpecialOffer.getName());
-            stmt.setFloat(2, SpecialOffer.getPrice());
-            stmt.setInt(3, SpecialOffer.getCategory().getId());
-            stmt.setInt(4, id);
-            stmt.executeUpdate();
-            conn.commit();
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    protected SpecialOffer mapGeneratedKeys(SpecialOffer obj, ResultSet generatedKeys) throws SQLException {
+        return new SpecialOffer(generatedKeys.getInt(1), obj.getName(), obj.getPrice(), obj.getCategory());
     }
 
     @Override
-    public boolean delete(int id) {
-        String sql = "DELETE FROM special_offer WHERE id = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-            conn.commit();
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    protected String getTableName() {
+        return "special_offer";
     }
 
     @Override
-    public HashMap<Integer, SpecialOffer> readAll() {
-        String sql = "SELECT * FROM special_offer JOIN category ON special_offer.id_category = category.id";
-        HashMap<Integer, SpecialOffer> specialOffers = new HashMap<>();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                specialOffers.put(rs.getInt("id"), new SpecialOffer(rs.getInt("id"), rs.getString("name"), rs.getFloat("price"), new Category(rs.getInt("category.id"), rs.getString("category.name"))));
-            }
-            return specialOffers;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    protected String getUpdateQuery() {
+        return "UPDATE special_offer SET name = ?, price = ?, id_category = ? WHERE id = ?";
+    }
+
+    @Override
+    protected void setUpdateParameters(PreparedStatement stmt, SpecialOffer obj, int id) throws SQLException {
+        stmt.setString(1, obj.getName());
+        stmt.setFloat(2, obj.getPrice());
+        stmt.setInt(3, obj.getCategory().getId());
+        stmt.setInt(4, id);
+    }
+
+    @Override
+    protected SpecialOffer mapResultSet(ResultSet rs) throws SQLException {
+        Category category = createCategoryFromResultSet(rs);
+
+        return new SpecialOffer(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getFloat("price"),
+                category
+        );
+    }
+
+    private Category createCategoryFromResultSet(ResultSet rs) throws SQLException {
+        return new Category(
+                rs.getInt("id_category"),
+                rs.getString("category_name")
+        );
     }
 }

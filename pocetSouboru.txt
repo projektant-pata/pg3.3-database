@@ -1,0 +1,14 @@
+--Puvodni
+Core: 2 (Main, DatabaseConnection)
+Object: 3 (Category, Food, SpecialOffer)
+App: 4 (FacadeInterface, CateegoryInterface, FoodInterface, SpecialOfferInterface)
+GUI: 4 (MainWindow, CategoryWindow, FoodWindow, SpecialOfferWindow)
+Total: 13
+
+--Aktualni
+Core: 2 (Main, DatabaseConnection)
+Object: 5 (AbstractObj, AbstractPricedItem, Category, Food, SpecialOffer)
+Data: 8 (AbstractDB, CategoryDB, FoodDB, SpecialOfferDB, IDataSource, ICategoryDS, IFoodDS, ISpecialOfferDS)
+App: 11 (AbstractManager, AbstractPricedManager, CategoryManager, FoodManager, SpecialOfferManager, IObjectManager, IPricedObjectManager, ICategoryManager, IFoodManager, ISpecialOfferManager)
+GUI: 4 (MainWindow, CategoryWindow, FoodWindow, SpecialOfferWindow)
+Total: 30

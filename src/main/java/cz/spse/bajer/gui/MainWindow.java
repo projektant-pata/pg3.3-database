@@ -1,16 +1,17 @@
 package cz.spse.bajer.gui;
 
 import cz.spse.bajer.app.App;
-import cz.spse.bajer.app.CategoryManager;
 import cz.spse.bajer.app.interfaces.ICategoryManager;
 import cz.spse.bajer.app.interfaces.IFoodManager;
 import cz.spse.bajer.app.interfaces.ISpecialOfferManager;
+import cz.spse.bajer.gui.edit.CategoryWindow;
+import cz.spse.bajer.gui.edit.ItemWindow;
 import cz.spse.bajer.object.*;
+import cz.spse.bajer.object.templates.AbstractObj;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindow extends JDialog {
@@ -25,6 +26,7 @@ public class MainWindow extends JDialog {
     private IFoodManager foodManager;
     private ISpecialOfferManager specialOfferManager;
 
+    private App app;
     private int lastId = -1;
 
     public MainWindow(App app) {
@@ -33,6 +35,7 @@ public class MainWindow extends JDialog {
         setTitle("Main Window");
         setLocationRelativeTo(null);
 
+        this.app = app;
         this.categoryManager = app.getCategoryManager();
         this.foodManager = app.getFoodManager();
         this.specialOfferManager = app.getSpecialOfferManager();
@@ -47,19 +50,20 @@ public class MainWindow extends JDialog {
 
         addCategoryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                setAddCategoryButton(null);
+                Category category = new Category(0, "temp");
+                editDialogBuilder(category);
             }
         });
-
-        addSpecialOfferButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                setAddSpecialOfferButton(null);
-            }
-        });
-
         addFoodButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                setAddFoodButton(null);
+                Food food = new Food(0, "temp", 0, new Category(0, "temp"));
+                editDialogBuilder(food);
+            }
+        });
+        addSpecialOfferButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                SpecialOffer specialOffer = new SpecialOffer(0, "temp", 0, new Category(0, "temp"));
+                editDialogBuilder(specialOffer);
             }
         });
 
@@ -71,13 +75,14 @@ public class MainWindow extends JDialog {
         List<Category> categories = categoryManager.readAll();
 
         for(Category category : categories){
+            System.out.println(category.getName());
             JButton categoryButton = new JButton(category.getName());
             categoryButton.setBackground(Color.yellow);
             categoryButton.setPreferredSize(new Dimension(400, 50));
             categoryButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    setAddCategoryButton(category);
+                    editDialogBuilder(category);
                 }
             });
             contentPanel.add(categoryButton);
@@ -93,7 +98,7 @@ public class MainWindow extends JDialog {
                 foodButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        setAddFoodButton(food);
+                        editDialogBuilder(food);
                     }
                 });
                 itemsPanel.add(foodButton);
@@ -104,11 +109,12 @@ public class MainWindow extends JDialog {
                 specialOfferButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent actionEvent) {
-                        setAddSpecialOfferButton(specialOffer);
+                        editDialogBuilder(specialOffer);
                     }
                 });
                 itemsPanel.add(specialOfferButton);
             }
+            contentPanel.add(itemsPanel);
         }
 
         contentPanel.revalidate();
@@ -116,84 +122,36 @@ public class MainWindow extends JDialog {
     }
 
 
-    private void setAddCategoryButton(Category category){
-        if (category != null)
-            lastId = category.getId();
-        CategoryWindow categoryWindow = new CategoryWindow(category);
-        categoryWindow.pack();
-        categoryWindow.setVisible(true);
+    private void editDialogBuilder(AbstractObj obj){
+        CategoryWindow window;
 
-        switch(categoryWindow.getRes()) {
+        if(obj == null)
+            return;
+        else if(obj instanceof Category){
+            window = new CategoryWindow(obj, app);
+        }else{
+            window = new ItemWindow(obj, app);
+        }
+        window.setVisible(true);
+
+        switch (window.getResult()) {
             case 0:
                 break;
             case 1:
-                if (lastId == -1)
-                    categoryManager.create(new Category(0, categoryWindow.getCategoryName()));
-                else
-                    categoryManager.update(lastId , new Category(lastId, categoryWindow.getCategoryName()));
-                fillWindow();
+                if(obj instanceof Category) {
+                    Category category = new Category(0, window.getName());
+                    categoryManager.create(category);
+                } else if (obj instanceof Food) {
+//                    Food food = new Food(0, window.getName(), window.getPrice(), window.getCategory());
+                    foodManager.create((Food) obj);
+                } else if (obj instanceof SpecialOffer) {
+                    specialOfferManager.create((SpecialOffer) obj);
+                }
                 break;
+
             case 2:
-                categoryManager.delete(lastId);
-                fillWindow();
                 break;
         }
-        lastId = -1;
     }
-
-    private void setAddFoodButton(Food food){
-        if (food != null)
-            lastId = food.getId();
-        FoodWindow foodWindow = new FoodWindow(food, categoryManager.readAll());
-        foodWindow.pack();
-        foodWindow.setVisible(true);
-
-        switch(foodWindow.getRes()) {
-            case 0:
-                break;
-            case 1:
-                if (lastId == -1)
-                    foodFacade.create(new Food(0, foodWindow.getFoodName(), foodWindow.getFoodPrice(), foodFacade.translateCategoryNameToId(foodWindow.getCategoryName())));
-                else
-                    foodFacade.update(lastId ,new Food(lastId, foodWindow.getFoodName(), foodWindow.getFoodPrice(), foodFacade.translateCategoryNameToId(foodWindow.getCategoryName())));
-                fillWindow();
-                break;
-            case 2:
-                foodFacade.delete(lastId);
-                fillWindow();
-                break;
-        }
-        lastId = -1;
-    }
-
-    private void setAddSpecialOfferButton(SpecialOffer specialOffer){
-        if (specialOffer != null)
-            lastId = specialOffer.getId();
-        SpecialOfferWindow specialOfferWindow = new SpecialOfferWindow(specialOffer, categories);
-        specialOfferWindow.pack();
-        specialOfferWindow.setVisible(true);
-
-        switch(specialOfferWindow.getRes()) {
-            case 0:
-                break;
-            case 1:
-                if (lastId == -1) {
-                    specialOfferFacade.create(new SpecialOffer(0, specialOfferWindow.getSpecialOfferName(), specialOfferWindow.getSpecialOfferPrice(), specialOfferFacade.translateCategoryNameToId(specialOfferWindow.getSpecialOfferCategoryName())));
-                } else
-                    specialOfferFacade.update(lastId ,new SpecialOffer(lastId, specialOfferWindow.getSpecialOfferName(), specialOfferWindow.getSpecialOfferPrice(), specialOfferFacade.translateCategoryNameToId(specialOfferWindow.getSpecialOfferCategoryName())));
-                fillWindow();
-                break;
-            case 2:
-                specialOfferFacade.delete(lastId);
-                fillWindow();
-                break;
-        }
-        lastId = -1;
-    }
-
-    private void editDialogBuilder(TemplateObj obj){
-
-    }
-
 }
 

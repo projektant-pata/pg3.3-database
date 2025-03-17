@@ -1,6 +1,8 @@
 package cz.spse.bajer.object;
 
-public class Category extends TemplateObj {
+import cz.spse.bajer.object.templates.AbstractObj;
+
+public class Category extends AbstractObj {
     public Category(int id, String name) {
         super(id, name);
     }

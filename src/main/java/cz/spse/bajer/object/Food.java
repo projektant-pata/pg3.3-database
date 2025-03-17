@@ -1,27 +1,10 @@
 package cz.spse.bajer.object;
 
-public class Food extends TemplateObj {
-    private float price;
-    private Category category;
+import cz.spse.bajer.object.templates.AbstractItem;
 
+public class Food extends AbstractItem {
     public Food(int id, String name, float price, Category category) {
-        super(id, name);
-        this.price = price;
-        this.category = category;
-    }
+        super(id, name, price, category);
 
-
-    public float getPrice() {
-        return price;
-    }
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setPrice(float price) {
-        this.price = price;
-    }
-    public void setCategory(Category category) {
-        this.category = category;
     }
 }
