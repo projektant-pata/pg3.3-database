@@ -35,4 +35,6 @@ build/
 .vscode/
 
 ### Mac OS ###
-.DS_StoreJavaFX/openjfx-23.0.2_linux-x64_bin-sdk/javafx-sdk-23.0.2/lib/libjfxwebkit.so
+.DS_Store
+
+JavaFX/openjfx-23.0.2_linux-x64_bin-sdk/javafx-sdk-23.0.2/lib/libjfxwebkit.so
