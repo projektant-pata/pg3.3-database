@@ -123,35 +123,67 @@ public class MainWindow extends JDialog {
 
 
     private void editDialogBuilder(AbstractObj obj){
-        CategoryWindow window;
-
-        if(obj == null)
+        if(obj == null){
+            System.out.println("Object is null");
             return;
-        else if(obj instanceof Category){
-            window = new CategoryWindow(obj, app);
-        }else{
-            window = new ItemWindow(obj, app);
         }
-        window.setVisible(true);
+        else if(obj instanceof Category){
+            CategoryWindow window = new CategoryWindow(obj, app);
+            window.setVisible(true);
 
-        switch (window.getResult()) {
-            case 0:
-                break;
-            case 1:
-                if(obj instanceof Category) {
+            switch (window.getResult()) {
+                case 0:
+                    break;
+                case 1:
                     Category category = new Category(0, window.getName());
                     categoryManager.create(category);
-                } else if (obj instanceof Food) {
-//                    Food food = new Food(0, window.getName(), window.getPrice(), window.getCategory());
-                    foodManager.create((Food) obj);
-                } else if (obj instanceof SpecialOffer) {
-                    specialOfferManager.create((SpecialOffer) obj);
-                }
-                break;
+                    break;
+                case 2:
+                    Category categoryNew = new Category(obj.getId(), window.getName());
+                    categoryManager.update(obj.getId(), categoryNew);
+                    break;
+                case 3:
+                    categoryManager.delete(obj.getId());
+                    break;
+            }
+        }else{
+            ItemWindow window = new ItemWindow(obj, app);
+            window.setVisible(true);
 
-            case 2:
-                break;
+            switch (window.getResult()) {
+                case 0:
+                    break;
+                case 1:
+                    if(obj instanceof Food){
+                        Food foodNew = new Food(obj.getId(), window.getName(), window.getPrice(), categoryManager.getByName(window.getCategory()));
+                        foodManager.create(foodNew);
+                    }else{
+                        SpecialOffer specialOffer = new SpecialOffer(0, window.getName(), window.getPrice(), categoryManager.getByName(window.getCategory()));
+                        specialOfferManager.create(specialOffer);
+                    }
+                    break;
+                case 2:
+                    if(obj instanceof Food){
+                        Food foodNew = new Food(obj.getId(), window.getName(), window.getPrice(), categoryManager.getByName(window.getCategory()));
+                        foodManager.update(obj.getId(), foodNew);
+                    }else{
+                        SpecialOffer specialOfferNew = new SpecialOffer(obj.getId(), window.getName(), window.getPrice(), categoryManager.getByName(window.getCategory()));
+                        specialOfferManager.update(obj.getId(), specialOfferNew);
+                    }
+                    break;
+                case 3:
+                    if(obj instanceof Food){
+                        foodManager.delete(obj.getId());
+                    }else{
+                        specialOfferManager.delete(obj.getId());
+                    }
+                    break;
+            }
+
+
         }
+        fillWindow();
+
     }
 }
 

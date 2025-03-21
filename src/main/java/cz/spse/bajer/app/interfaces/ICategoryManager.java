@@ -5,4 +5,5 @@ import cz.spse.bajer.object.Category;
 import java.util.HashMap;
 
 public interface ICategoryManager extends IObjectManager<Category> {
+    public Category getByName(String name);
 }

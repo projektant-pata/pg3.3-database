@@ -28,8 +28,6 @@ public class ItemWindow extends CategoryWindow {
         return ((PricedObjectFormPanel) getContentPane().getComponent(0)).getCategory();
     }
 
-
-    // Vnitřní třída pro formulář s cenou a kategorií
     protected class PricedObjectFormPanel extends FormNamePanel {
         protected final JTextField priceField;
         protected final JComboBox<String> categoriesComboBox;

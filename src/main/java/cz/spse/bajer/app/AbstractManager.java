@@ -17,6 +17,7 @@ public abstract class AbstractManager<T> implements IObjectManager<T> {
 
     @Override
     public T create(T obj) {
+        System.out.println("Manager creating");
         T result = dataSource.create(obj);
         if (result != null) {
             items.put(getId(result), result);

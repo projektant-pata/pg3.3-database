@@ -19,6 +19,7 @@ public abstract class AbstractDB<T> implements IDataSource<T> {
 
     @Override
     public T create(T obj) {
+        System.out.println("DB creating");
         try (PreparedStatement stmt = conn.prepareStatement(getInsertQuery(), Statement.RETURN_GENERATED_KEYS)) {
             setInsertParameters(stmt, obj);
             stmt.executeUpdate();
@@ -26,6 +27,7 @@ public abstract class AbstractDB<T> implements IDataSource<T> {
 
             try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
+                    System.out.println("Vloženo ID: " + generatedKeys.getInt(1));
                     return mapGeneratedKeys(obj, generatedKeys);
                 }
             }

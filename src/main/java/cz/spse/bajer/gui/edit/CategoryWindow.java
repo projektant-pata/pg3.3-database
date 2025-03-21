@@ -38,7 +38,19 @@ public class CategoryWindow extends JDialog {
 
 
         if (isRemove){
-            buttonsPanel.setAddAction(e -> {res = 2; dispose();});
+            buttonsPanel.setRemoveAction(e -> {
+                int confirm = JOptionPane.showConfirmDialog(
+                        CategoryWindow.this,
+                        "Opravdu chcete smazat tento objekt?",
+                        "Potvrzení smazání",
+                        JOptionPane.YES_NO_OPTION
+                );
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    res = 3;
+                    dispose();
+                }
+            });
             buttonsPanel.setRemoveAction(e -> {res = 3; dispose();});
         }else{
             buttonsPanel.setAddAction(e -> {res = 1; dispose();});
@@ -57,8 +69,14 @@ public class CategoryWindow extends JDialog {
     }
 
     public int getResult() {
+        System.out.println("Result: " + res);
         return res;
     }
+
+    public String getName() {
+        return ((FormNamePanel) getContentPane().getComponent(0)).getName();
+    }
+
     protected class FormNamePanel extends JPanel {
         protected final JTextField nameField;
 
@@ -87,6 +105,7 @@ public class CategoryWindow extends JDialog {
         }
 
         public String getName() {
+            System.out.println("Name: " + nameField.getText());
             return nameField.getText();
         }
 

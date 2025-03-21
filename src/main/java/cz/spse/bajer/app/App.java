@@ -18,9 +18,10 @@ public class App {
     private ICategoryManager categoryManager;
     private IFoodManager foodManager;
     private ISpecialOfferManager specialOfferManager;
-
+    private Connection conn;
     public App() {
-        Connection conn = DatabaseConnection.getConnection();
+        this.conn = DatabaseConnection.getConnection();
+
         ICategoryDS categoryDS = new CategoryDB(conn);
         IFoodDS foodDS = new FoodDB(conn);
         ISpecialOfferDS specialOfferDS = new SpecialOfferDB(conn);
@@ -44,5 +45,11 @@ public class App {
         MainWindow dialog = new MainWindow(this);
         dialog.pack();
         dialog.setVisible(true);
+    }
+    public void shutdown(){
+        if (this.conn != null) {
+            DatabaseConnection.closeConnection(this.conn);
+        }
+        DatabaseConnection.closePool();
     }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database-config>
+    <connection>
+        <url>jdbc:mysql://localhost:3306/pg_skibidi_database?useUnicode=true&amp;characterEncoding=UTF-8</url>
+        <user>root</user>
+        <password></password>
+    </connection>
+    <pool>
+        <maximum-pool-size>5</maximum-pool-size>
+        <minimum-idle>2</minimum-idle>
+        <idle-timeout>30000</idle-timeout>
+        <connection-timeout>30000</connection-timeout>
+    </pool>
+</database-config>
